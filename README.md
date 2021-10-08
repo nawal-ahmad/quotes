@@ -15,3 +15,7 @@ An app using a provided json file to show random popular book quotes with the au
 
 ## Testing
 Create tests in order to make sure that GSON worked well and that we got one quote each time it is run.
+
+## Lab 9
+The application send GET request to api and show one quote.
+

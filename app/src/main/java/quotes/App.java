@@ -6,43 +6,75 @@ package quotes;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 
 public class App {
     public static void main(String[] args) {
         try {
-            FileReader quotesFile = new FileReader("app/src/main/resources/recentquotes.json");
-            ArrayList<Quotes> quotes= readJsonFile(quotesFile);
-            int rand = (int) (Math.random() * (quotes.size()));
-            System.out.println("---------------------------------------------------Quote---------------------------------------------------");
-            System.out.println(quotes.get(rand).toString());
-            System.out.println("---------------------------------------------------Quote---------------------------------------------------");
+            String url = "http://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en";
+            HttpURLConnection connect = (HttpURLConnection) new URL(url).openConnection();
+            connect.setRequestMethod("GET");
+            connect.setConnectTimeout(5000);
+            connect.setReadTimeout(5000);
+            int responseCode = connect.getResponseCode();
 
-        } catch (FileNotFoundException e) {
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                InputStream input = connect.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(input);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                // this data is the JSON
+                String data = bufferedReader.readLine();
+//                System.out.println(data);
+                bufferedReader.close();
+
+
+                Gson gson = new Gson();
+                APIQuotes quote = gson.fromJson(data, APIQuotes.class);
+
+                System.out.println("==========================================================================================");
+                System.out.println("Auther: " +quote.getQuoteAuthor());
+                System.out.println("Quote Text: " +quote.getQuoteText());
+                System.out.println("==========================================================================================");
+
+
+            } else {
+                System.out.println("Request unable to processed");
+                connect.disconnect();
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Lab 8
+//        try {
+//            FileReader quotesFile = new FileReader("app/src/main/resources/recentquotes.json");
+//            ArrayList<Quotes> quotes= readJsonFile(quotesFile);
+//            int rand = (int) (Math.random() * (quotes.size()));
+//            System.out.println("---------------------------------------------------Quote---------------------------------------------------");
+//            System.out.println(quotes.get(rand).toString());
+//            System.out.println("---------------------------------------------------Quote---------------------------------------------------");
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public static ArrayList<Quotes> readJsonFile(FileReader jsonFile) {
         // create Gson instance
         Gson gson = new Gson();
-
         // create a reader
         BufferedReader reader = new BufferedReader(jsonFile);
-
         // convert JSON array to list of users
         ArrayList<Quotes> quotes = gson.fromJson(reader,new TypeToken<ArrayList<Quotes>>() {}.getType());
-
         try {
             // close reader
             reader.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
