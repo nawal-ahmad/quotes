@@ -15,6 +15,9 @@ public class Quotes {
         this.text = text;
     }
 
+    public Quotes(String quoteAuthor, String quoteText) {
+    }
+
     public ArrayList<String> getTags() {
         return tags;
     }
